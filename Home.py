@@ -6,69 +6,64 @@ import streamlit as st
 st.set_page_config(
     page_title="Tender Calculator",
     layout="wide",
-    initial_sidebar_state="collapsed",
+    initial_sidebar_state="collapsed"
 )
 
 # ---------------------------------------------------------
-# CUSTOM CSS (UI / THEME)
+# CSS STYLING
 # ---------------------------------------------------------
-st.markdown(
-    """
+st.markdown("""
 <style>
 
-/* Hide Streamlit default chrome: top bar, footer, sidebar */
 header {visibility: hidden;}
 footer {visibility: hidden;}
 section[data-testid="stSidebar"] {display: none !important;}
 div[data-testid="stToolbar"] {display: none !important;}
 div[data-testid="collapsedControl"] {display: none !important;}
 
-/* Page background and container width */
 body {
     background-color: #F2F2F2;
 }
+
 div.block-container {
     padding-top: 0rem;
     max-width: 1100px;
 }
 
-/* Banner */
+/* Banner edge fix */
 .banner-wrapper {
-    margin-left: -3rem;
-    margin-right: -3rem;
+    margin-left: -4rem;
+    margin-right: -4rem;
 }
 
-/* Frame (card) around buttons + description */
-.module-frame {
-    margin-top: 2rem;
-    padding: 2.5rem 3rem 2rem 3rem;
-    background-color: #FFFFFF;
-    border-radius: 20px;
-    border: 1px solid #DDDDDD;
-    box-shadow: 0px 6px 18px rgba(0,0,0,0.08);
+/* Buttons container */
+.buttons-section {
+    margin-top: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 26px;
 }
 
-/* 2x2 grid container for buttons */
-.button-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 1.8rem 2.8rem;
-    justify-items: center;
-    margin-bottom: 1.8rem;
+/* Each row of buttons */
+.button-row {
+    display: flex;
+    justify-content: center;
+    gap: 28px;
 }
 
-/* Style ALL Streamlit buttons as pill buttons */
+/* Pill button styling */
 .stButton > button {
-    width: 260px;
-    height: 80px;
+    width: 300px;
+    height: 95px;
     border-radius: 999px;
-    border: 2px solid #E1251B;
+    border: 3px solid #E1251B;
     background: #FFFFFF;
     color: #E1251B;
-    font-size: 19px;
-    font-weight: 600;
-    letter-spacing: 0.5px;
-    box-shadow: 0px 4px 10px rgba(0,0,0,0.12);
+    font-size: 22px;
+    font-weight: 700;
+    letter-spacing: 0.8px;
+    box-shadow: 0px 6px 20px rgba(0,0,0,0.16);
     transition: all 0.18s ease-in-out;
 }
 
@@ -76,82 +71,70 @@ div.block-container {
 .stButton > button:hover {
     background: #E1251B;
     color: #FFFFFF;
-    transform: translateY(-2px) scale(1.02);
-    box-shadow: 0px 8px 16px rgba(0,0,0,0.22);
+    transform: translateY(-3px) scale(1.03);
+    box-shadow: 0px 12px 26px rgba(0,0,0,0.26);
     cursor: pointer;
 }
 
-/* Description text inside the frame */
-.tool-description {
-    margin-top: 0.5rem;
-    padding: 0.9rem 1.1rem;
-    border-radius: 12px;
-    background-color: #F7F7F7;
-    border: 1px solid #E4E4E4;
-    font-size: 14px;
-    color: #444444;
+/* Description card */
+.description-box {
+    margin: 1.2rem auto 1.1rem auto;
+    padding: 0.8rem 1.3rem;
+    background: #FFFFFF;
+    border-radius: 14px;
+    border: 1px solid #DDDDDD;
+    text-align: center;
+    font-size: 16px;
+    color: #333333;
 }
 
-/* Center alignment helper */
-.center {
-    text-align: center;
-}
 </style>
-""",
-    unsafe_allow_html=True,
-)
+""", unsafe_allow_html=True)
 
 # ---------------------------------------------------------
 # BANNER
 # ---------------------------------------------------------
 st.markdown('<div class="banner-wrapper">', unsafe_allow_html=True)
-# Make sure "tender_banner.png" exists in the repo root
 st.image("tender_banner.png", use_column_width=True)
-st.markdown("</div>", unsafe_allow_html=True)
+st.markdown('</div>', unsafe_allow_html=True)
 
 # ---------------------------------------------------------
-# MAIN FRAME (BUTTONS + DESCRIPTION)
+# DESCRIPTION
 # ---------------------------------------------------------
-with st.container():
-    st.markdown('<div class="module-frame">', unsafe_allow_html=True)
-
-    # --- 2x2 button grid with icons ---
-    st.markdown('<div class="button-grid">', unsafe_allow_html=True)
-
-    col1, col2 = st.columns(2)
-    with col1:
-        if st.button("📦  Magazine", key="mag_btn"):
-            st.session_state["page"] = "magazine"
-    with col2:
-        if st.button("⚙️  Equipment", key="eq_btn"):
-            st.session_state["page"] = "equipment"
-
-    col3, col4 = st.columns(2)
-    with col3:
-        if st.button("🏭  Plant", key="pl_btn"):
-            st.session_state["page"] = "plant"
-    with col4:
-        if st.button("👷  Personnel", key="per_btn"):
-            st.session_state["page"] = "personnel"
-
-    st.markdown("</div>", unsafe_allow_html=True)  # close button-grid
-
-    # --- Description inside small framed area ---
-    st.markdown(
-        """
-        <div class="tool-description center">
-            Tender Calculator is an internal decision-support tool that helps commercial teams
-            quickly estimate magazine capacity, equipment fleet, plant requirements and
-            personnel needs for new or existing projects.
-        </div>
-        """,
-        unsafe_allow_html=True,
-    )
-
-    st.markdown("</div>", unsafe_allow_html=True)  # close module-frame
+st.markdown("""
+<div class="description-box">
+Tender Calculator is a decision-support tool that helps commercial teams quickly 
+estimate magazine capacity, equipment fleet, plant requirements, and personnel 
+needs for new or existing mining projects.
+</div>
+""", unsafe_allow_html=True)
 
 # ---------------------------------------------------------
-# NAVIGATION TO OTHER PAGES
+# BUTTONS SECTION
+# ---------------------------------------------------------
+st.markdown('<div class="buttons-section">', unsafe_allow_html=True)
+
+# --- Row 1 ---
+st.markdown('<div class="button-row">', unsafe_allow_html=True)
+if st.button("📦 Magazine", key="mag"): st.session_state["page"] = "magazine"
+if st.button("⚙️ Equipment", key="eq"): st.session_state["page"] = "equipment"
+st.markdown('</div>', unsafe_allow_html=True)
+
+# --- Row 2 ---
+st.markdown('<div class="button-row">', unsafe_allow_html=True)
+if st.button("🏭 Plant", key="pl"): st.session_state["page"] = "plant"
+if st.button("👷 Personnel", key="per"): st.session_state["page"] = "personnel"
+st.markdown('</div>', unsafe_allow_html=True)
+
+# --- Row 3 (Diesel centered) ---
+st.markdown('<div class="button-row">', unsafe_allow_html=True)
+if st.button("⛽ Diesel", key="dies"): st.session_state["page"] = "diesel"
+st.markdown('</div>', unsafe_allow_html=True)
+
+st.markdown('</div>', unsafe_allow_html=True)
+
+# ---------------------------------------------------------
+# PAGE NAVIGATION
 # ---------------------------------------------------------
 if "page" in st.session_state:
     if st.session_state["page"] == "magazine":
@@ -162,3 +145,5 @@ if "page" in st.session_state:
         st.switch_page("pages/3_Plant.py")
     elif st.session_state["page"] == "personnel":
         st.switch_page("pages/4_Personnel.py")
+    elif st.session_state["page"] == "diesel":
+        st.switch_page("pages/5_Diesel.py")
