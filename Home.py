@@ -103,7 +103,7 @@ st.markdown('</div>', unsafe_allow_html=True)
 # ---------------------------------------------------------
 st.markdown("""
 <div class="description-box">
-Tender Calculator is a decision-support tool that helps commercial teams quickly 
+Tender Calculator is a decision-support tool that helps quickly 
 estimate magazine capacity, equipment fleet, plant requirements, and personnel 
 needs for new or existing mining projects.
 </div>
