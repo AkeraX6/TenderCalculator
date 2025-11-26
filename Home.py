@@ -3,11 +3,7 @@ import streamlit as st
 # ---------------------------------------------------------
 # PAGE CONFIG
 # ---------------------------------------------------------
-st.set_page_config(
-    page_title="Tender Calculator",
-    layout="wide",
-    initial_sidebar_state="collapsed"
-)
+st.set_page_config(page_title="Tender Calculator", layout="wide")
 
 # ---------------------------------------------------------
 # CSS
@@ -15,66 +11,67 @@ st.set_page_config(
 st.markdown("""
 <style>
 
-header {visibility: hidden;}
-footer {visibility: hidden;}
-section[data-testid="stSidebar"] {display: none !important;}
-div[data-testid="stToolbar"] {display: none !important;}
-div[data-testid="collapsedControl"] {display: none !important;}
-
-body {
-    background-color: #F2F2F2;
-}
+header {visibility:hidden;}
+footer {visibility:hidden;}
+section[data-testid="stSidebar"] {display:none !important;}
+div[data-testid="stToolbar"] {display:none !important;}
+div[data-testid="collapsedControl"] {display:none !important;}
 
 div.block-container {
-    padding-top: 0rem;
-    max-width: 1100px;
-    margin: auto;
+    padding-top:0rem;
+    max-width:1200px;
+    margin:auto;
 }
 
-/* Banner push to sides */
-.banner-wrapper {
-    margin-left: -4rem;
-    margin-right: -4rem;
+.banner {
+    margin-left:-4rem;
+    margin-right:-4rem;
 }
 
-/* Button Grid */
+/* -------- BUTTON MATRIX -------- */
 .button-grid {
-    margin-top: 2.2rem;
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    justify-items: center;
-    row-gap: 28px;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    margin-top:32px;
 }
 
-/* Button Style */
+/* one row (horizontal) */
+.button-row {
+    display:flex;
+    justify-content:center;
+    gap:38px;
+    margin-bottom:26px;
+}
+
+/* button fixed width styling */
 .stButton > button {
-    width: 270px;
-    height: 95px;
-    border-radius: 999px;
-    border: 3px solid #E1251B;
-    background: #fff;
-    color: #E1251B;
-    font-size: 24px;
-    font-weight: 700;
-    letter-spacing: 0.8px;
-    box-shadow: 0px 6px 20px rgba(0,0,0,0.18);
-    transition: all 0.18s ease-in-out;
+    width:280px !important;
+    height:90px !important;
+    border-radius:999px !important;
+    border:3px solid #E1251B !important;
+    background:white !important;
+    color:#E1251B !important;
+    font-size:23px !important;
+    font-weight:700 !important;
+    letter-spacing:0.7px;
+    box-shadow:0px 6px 18px rgba(0,0,0,0.20);
+    transition:0.18s ease-in-out;
 }
 
-/* Hover effect */
 .stButton > button:hover {
-    background: #E1251B;
-    color: #fff;
-    transform: translateY(-3px) scale(1.03);
-    box-shadow: 0px 12px 26px rgba(0,0,0,0.28);
+    background:#E1251B !important;
+    color:white !important;
+    transform:translateY(-3px) scale(1.03);
+    box-shadow:0px 12px 26px rgba(0,0,0,0.28);
 }
 
-/* Italic description */
-.description-box {
-    margin-top: 1rem;
-    text-align: center;
-    font-size: 18px;
-    font-style: italic;
+/* description */
+.desc {
+    text-align:center;
+    font-size:18px;
+    font-style:italic;
+    margin-top:12px;
 }
 
 </style>
@@ -83,49 +80,46 @@ div.block-container {
 # ---------------------------------------------------------
 # BANNER
 # ---------------------------------------------------------
-st.markdown('<div class="banner-wrapper">', unsafe_allow_html=True)
+st.markdown('<div class="banner">', unsafe_allow_html=True)
 st.image("tender_banner.png", use_column_width=True)
-st.markdown("</div>", unsafe_allow_html=True)
+st.markdown('</div>', unsafe_allow_html=True)
 
 # ---------------------------------------------------------
-# SHORT DESCRIPTION
+# DESCRIPTION
 # ---------------------------------------------------------
-st.markdown('<div class="description-box">A tool to estimate requirements for mining projects.</div>',
-            unsafe_allow_html=True)
+st.markdown('<p class="desc">A tool to estimate requirements for mining projects.</p>', unsafe_allow_html=True)
 
 # ---------------------------------------------------------
-# BUTTON GRID (3x3 layout)
+# BUTTON MATRIX (HORIZONTAL ROWS LOCKED)
 # ---------------------------------------------------------
 st.markdown('<div class="button-grid">', unsafe_allow_html=True)
 
-# Row 1
+# ROW 1
+st.markdown('<div class="button-row">', unsafe_allow_html=True)
 if st.button("📦 Magazine", key="mag"): st.session_state["page"] = "magazine"
 if st.button("⚙️ Equipment", key="eq"): st.session_state["page"] = "equipment"
 if st.button("🏭 Plant", key="pl"): st.session_state["page"] = "plant"
+st.markdown('</div>', unsafe_allow_html=True)
 
-# Row 2
+# ROW 2
+st.markdown('<div class="button-row">', unsafe_allow_html=True)
 if st.button("⛽ Diesel", key="dies"): st.session_state["page"] = "diesel"
 if st.button("👷 Personnel", key="per"): st.session_state["page"] = "personnel"
-st.markdown("<div></div>", unsafe_allow_html=True) # Placeholder to preserve grid
+st.markdown('<div style="width:280px;"></div>', unsafe_allow_html=True) # placeholder
+st.markdown('</div>', unsafe_allow_html=True)
 
-# Row 3 -> all placeholders for now, to complete the 3x3 design
-st.markdown("<div></div>", unsafe_allow_html=True)
-st.markdown("<div></div>", unsafe_allow_html=True)
-st.markdown("<div></div>", unsafe_allow_html=True)
-
-st.markdown("</div>", unsafe_allow_html=True)
+st.markdown('</div>', unsafe_allow_html=True)
 
 # ---------------------------------------------------------
-# PAGE ROUTING
+# PAGE NAVIGATION
 # ---------------------------------------------------------
 if "page" in st.session_state:
-    if st.session_state["page"] == "magazine":
-        st.switch_page("pages/1_Magazine.py")
-    elif st.session_state["page"] == "equipment":
-        st.switch_page("pages/2_Equipment.py")
-    elif st.session_state["page"] == "plant":
-        st.switch_page("pages/3_Plant.py")
-    elif st.session_state["page"] == "diesel":
-        st.switch_page("pages/5_Diesel.py")
-    elif st.session_state["page"] == "personnel":
-        st.switch_page("pages/4_Personnel.py")
+    st.switch_page(
+        {
+            "magazine":"pages/1_Magazine.py",
+            "equipment":"pages/2_Equipment.py",
+            "plant":"pages/3_Plant.py",
+            "diesel":"pages/5_Diesel.py",
+            "personnel":"pages/4_Personnel.py",
+        }[st.session_state["page"]]
+    )
