@@ -1,118 +1,158 @@
 import streamlit as st
 
-# ================= PAGE CONFIG ================= #
-st.set_page_config(page_title="Tender Calculator", layout="wide")
+# ---------------------------------------------------------
+# PAGE CONFIG
+# ---------------------------------------------------------
+st.set_page_config(
+    page_title="Tender Calculator",
+    layout="wide",
+    initial_sidebar_state="collapsed",
+)
 
-# ================= CUSTOM CSS ================== #
-st.markdown("""
+# ---------------------------------------------------------
+# CUSTOM CSS (UI / THEME)
+# ---------------------------------------------------------
+st.markdown(
+    """
 <style>
 
-/* Hide Streamlit Default UI Elements */
-header {visibility: hidden;}          /* Top menu */
-footer {visibility: hidden;}          /* Footer */
-.st-emotion-cache-1gulkj5 {display: none;} /* Hamburger menu */
-.st-emotion-cache-16txtl3 {display: none;} /* GitHub icon */
-
-/* Hide sidebar entirely */
+/* Hide Streamlit default chrome: top bar, footer, sidebar */
+header {visibility: hidden;}
+footer {visibility: hidden;}
 section[data-testid="stSidebar"] {display: none !important;}
+div[data-testid="stToolbar"] {display: none !important;}
 div[data-testid="collapsedControl"] {display: none !important;}
 
-/* Background */
+/* Page background and container width */
 body {
     background-color: #F2F2F2;
 }
-
-/* Remove top padding */
 div.block-container {
     padding-top: 0rem;
+    max-width: 1100px;
 }
 
-/* Top Header Bar */
-.header-container {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background-color: #E1251B;
-    padding: 20px;
-    width: 100%;
+/* Banner */
+.banner-wrapper {
+    margin-left: -3rem;
+    margin-right: -3rem;
 }
 
-/* Logo left */
-.header-logo {
-    position: absolute;
-    left: 20px;
-}
-
-/* Title center */
-.header-title {
-    color: white;
-    font-size: 40px;
-    font-weight: 800;
-    letter-spacing: 2px;
-}
-
-/* Button style */
-.module-btn {
-    width: 250px;
-    height: 80px;
-    text-align: center;
-    font-size: 20px;
-    font-weight: 600;
+/* Frame (card) around buttons + description */
+.module-frame {
+    margin-top: 2rem;
+    padding: 2.5rem 3rem 2rem 3rem;
+    background-color: #FFFFFF;
     border-radius: 20px;
-    border: none;
-    color: #E1251B !important;
-    background-color: white !important;
-    box-shadow: 0px 3px 8px rgba(0,0,0,0.25);
-    transition: all 0.2s ease-in-out;
+    border: 1px solid #DDDDDD;
+    box-shadow: 0px 6px 18px rgba(0,0,0,0.08);
 }
 
-.module-btn:hover {
-    background-color: #ffddd8 !important;
-    transform: scale(1.05);
+/* 2x2 grid container for buttons */
+.button-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.8rem 2.8rem;
+    justify-items: center;
+    margin-bottom: 1.8rem;
+}
+
+/* Style ALL Streamlit buttons as pill buttons */
+.stButton > button {
+    width: 260px;
+    height: 80px;
+    border-radius: 999px;
+    border: 2px solid #E1251B;
+    background: #FFFFFF;
+    color: #E1251B;
+    font-size: 19px;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    box-shadow: 0px 4px 10px rgba(0,0,0,0.12);
+    transition: all 0.18s ease-in-out;
+}
+
+/* Hover effect */
+.stButton > button:hover {
+    background: #E1251B;
+    color: #FFFFFF;
+    transform: translateY(-2px) scale(1.02);
+    box-shadow: 0px 8px 16px rgba(0,0,0,0.22);
     cursor: pointer;
 }
 
-/* Button container */
-.btn-container {
-    margin-top: 120px;
-    display: flex;
-    justify-content: center;
-    gap: 80px;
+/* Description text inside the frame */
+.tool-description {
+    margin-top: 0.5rem;
+    padding: 0.9rem 1.1rem;
+    border-radius: 12px;
+    background-color: #F7F7F7;
+    border: 1px solid #E4E4E4;
+    font-size: 14px;
+    color: #444444;
 }
 
+/* Center alignment helper */
+.center {
+    text-align: center;
+}
 </style>
-""", unsafe_allow_html=True)
+""",
+    unsafe_allow_html=True,
+)
 
-# ================= HEADER ================= #
-st.markdown(f"""
-<div class="header-container">
-    <img src="maxam_logo.png" class="header-logo" width="110">
-    <div class="header-title">TENDER CALCULATOR</div>
-</div>
-""", unsafe_allow_html=True)
+# ---------------------------------------------------------
+# BANNER
+# ---------------------------------------------------------
+st.markdown('<div class="banner-wrapper">', unsafe_allow_html=True)
+# Make sure "tender_banner.png" exists in the repo root
+st.image("tender_banner.png", use_column_width=True)
+st.markdown("</div>", unsafe_allow_html=True)
 
+# ---------------------------------------------------------
+# MAIN FRAME (BUTTONS + DESCRIPTION)
+# ---------------------------------------------------------
+with st.container():
+    st.markdown('<div class="module-frame">', unsafe_allow_html=True)
 
-# ================= MAIN BUTTONS ================= #
-col1, col2, col3, col4 = st.columns([1,1,1,1])
+    # --- 2x2 button grid with icons ---
+    st.markdown('<div class="button-grid">', unsafe_allow_html=True)
 
-with col1:
-    if st.button("Magazine", key="mag", help="Go to magazine calculator", use_container_width=True):
-        st.session_state["page"] = "magazine"
+    col1, col2 = st.columns(2)
+    with col1:
+        if st.button("📦  Magazine", key="mag_btn"):
+            st.session_state["page"] = "magazine"
+    with col2:
+        if st.button("⚙️  Equipment", key="eq_btn"):
+            st.session_state["page"] = "equipment"
 
-with col2:
-    if st.button("Equipment", key="eq", use_container_width=True):
-        st.session_state["page"] = "equipment"
+    col3, col4 = st.columns(2)
+    with col3:
+        if st.button("🏭  Plant", key="pl_btn"):
+            st.session_state["page"] = "plant"
+    with col4:
+        if st.button("👷  Personnel", key="per_btn"):
+            st.session_state["page"] = "personnel"
 
-with col3:
-    if st.button("Plant", key="pl", use_container_width=True):
-        st.session_state["page"] = "plant"
+    st.markdown("</div>", unsafe_allow_html=True)  # close button-grid
 
-with col4:
-    if st.button("Personnel", key="per", use_container_width=True):
-        st.session_state["page"] = "personnel"
+    # --- Description inside small framed area ---
+    st.markdown(
+        """
+        <div class="tool-description center">
+            Tender Calculator is an internal decision-support tool that helps commercial teams
+            quickly estimate magazine capacity, equipment fleet, plant requirements and
+            personnel needs for new or existing projects.
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
 
+    st.markdown("</div>", unsafe_allow_html=True)  # close module-frame
 
-# ================= PAGE NAVIGATION ================= #
+# ---------------------------------------------------------
+# NAVIGATION TO OTHER PAGES
+# ---------------------------------------------------------
 if "page" in st.session_state:
     if st.session_state["page"] == "magazine":
         st.switch_page("pages/1_Magazine.py")
