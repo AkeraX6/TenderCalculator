@@ -15,77 +15,72 @@ st.set_page_config(
 st.markdown("""
 <style>
 
+/* Hide unwanted Streamlit UI */
 header {visibility: hidden;}
 footer {visibility: hidden;}
 section[data-testid="stSidebar"] {display: none !important;}
 div[data-testid="stToolbar"] {display: none !important;}
 div[data-testid="collapsedControl"] {display: none !important;}
 
-body {
-    background-color: #F2F2F2;
-}
-
+/* Page layout */
 div.block-container {
     padding-top: 0rem;
-    max-width: 1100px;
+    max-width: 1050px;
 }
 
-/* Banner edge fix */
+/* Banner width fix */
 .banner-wrapper {
-    margin-left: -4rem;
-    margin-right: -4rem;
+    margin-left: -3.5rem;
+    margin-right: -3.5rem;
 }
 
-/* Buttons container */
+/* Container grouping */
 .buttons-section {
-    margin-top: 1.5rem;
+    margin-top: 1.6rem;
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    gap: 55px;
+}
+
+/* Two column structure */
+.col-left, .col-right {
     display: flex;
     flex-direction: column;
+    gap: 22px;
     align-items: center;
-    gap: 26px;
 }
 
-/* Each row of buttons */
-.button-row {
-    display: flex;
-    justify-content: center;
-    gap: 28px;
-}
-
-/* Pill button styling */
+/* Button Style */
 .stButton > button {
-    width: 300px;
-    height: 95px;
+    width: 270px;
+    height: 90px;
     border-radius: 999px;
     border: 3px solid #E1251B;
     background: #FFFFFF;
     color: #E1251B;
-    font-size: 22px;
+    font-size: 23px;
     font-weight: 700;
-    letter-spacing: 0.8px;
+    letter-spacing: 0.7px;
     box-shadow: 0px 6px 20px rgba(0,0,0,0.16);
     transition: all 0.18s ease-in-out;
 }
 
-/* Hover effect */
+/* Hover animation */
 .stButton > button:hover {
     background: #E1251B;
-    color: #FFFFFF;
+    color: white;
     transform: translateY(-3px) scale(1.03);
-    box-shadow: 0px 12px 26px rgba(0,0,0,0.26);
-    cursor: pointer;
+    box-shadow: 0px 12px 28px rgba(0,0,0,0.26);
 }
 
-/* Description card */
+/* Italic description */
 .description-box {
-    margin: 1.2rem auto 1.1rem auto;
-    padding: 0.8rem 1.3rem;
-    background: #FFFFFF;
-    border-radius: 14px;
-    border: 1px solid #DDDDDD;
+    margin-top: 1.0rem;
     text-align: center;
-    font-size: 16px;
-    color: #333333;
+    font-size: 18px;
+    font-style: italic;
+    color: #333;
 }
 
 </style>
@@ -96,42 +91,36 @@ div.block-container {
 # ---------------------------------------------------------
 st.markdown('<div class="banner-wrapper">', unsafe_allow_html=True)
 st.image("tender_banner.png", use_column_width=True)
-st.markdown('</div>', unsafe_allow_html=True)
+st.markdown("</div>", unsafe_allow_html=True)
 
 # ---------------------------------------------------------
-# DESCRIPTION
+# SHORT DESCRIPTION (ITALIC)
 # ---------------------------------------------------------
 st.markdown("""
 <div class="description-box">
-Tender Calculator is a decision-support tool that helps quickly 
-estimate magazine capacity, equipment fleet, plant requirements, and personnel 
-needs for new or existing mining projects.
+A fast support tool for commercial teams to estimate requirements for new mining projects.
 </div>
 """, unsafe_allow_html=True)
 
 # ---------------------------------------------------------
-# BUTTONS SECTION
+# BUTTON GRID (5 BUTTONS, 2 COLUMNS)
 # ---------------------------------------------------------
 st.markdown('<div class="buttons-section">', unsafe_allow_html=True)
 
-# --- Row 1 ---
-st.markdown('<div class="button-row">', unsafe_allow_html=True)
+# LEFT COLUMN (3 buttons)
+st.markdown('<div class="col-left">', unsafe_allow_html=True)
 if st.button("📦 Magazine", key="mag"): st.session_state["page"] = "magazine"
 if st.button("⚙️ Equipment", key="eq"): st.session_state["page"] = "equipment"
+if st.button("🏭 Plant", key="pl"): st.session_state["page"] = "plant"
 st.markdown('</div>', unsafe_allow_html=True)
 
-# --- Row 2 ---
-st.markdown('<div class="button-row">', unsafe_allow_html=True)
-if st.button("🏭 Plant", key="pl"): st.session_state["page"] = "plant"
+# RIGHT COLUMN (2 buttons)
+st.markdown('<div class="col-right">', unsafe_allow_html=True)
+if st.button("⛽ Diesel", key="dies"): st.session_state["page"] = "diesel"
 if st.button("👷 Personnel", key="per"): st.session_state["page"] = "personnel"
 st.markdown('</div>', unsafe_allow_html=True)
 
-# --- Row 3 (Diesel centered) ---
-st.markdown('<div class="button-row">', unsafe_allow_html=True)
-if st.button("⛽ Diesel", key="dies"): st.session_state["page"] = "diesel"
-st.markdown('</div>', unsafe_allow_html=True)
-
-st.markdown('</div>', unsafe_allow_html=True)
+st.markdown("</div>", unsafe_allow_html=True)
 
 # ---------------------------------------------------------
 # PAGE NAVIGATION
