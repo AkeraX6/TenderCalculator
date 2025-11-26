@@ -7,16 +7,24 @@ st.set_page_config(page_title="Tender Calculator", layout="wide")
 st.markdown("""
 <style>
 
-/* Remove default padding & sidebar */
-div.block-container {
-    padding-top: 0rem;
-    padding-left: 0rem;
-    padding-right: 0rem;
-}
+/* Hide Streamlit Default UI Elements */
+header {visibility: hidden;}          /* Top menu */
+footer {visibility: hidden;}          /* Footer */
+.st-emotion-cache-1gulkj5 {display: none;} /* Hamburger menu */
+.st-emotion-cache-16txtl3 {display: none;} /* GitHub icon */
+
+/* Hide sidebar entirely */
+section[data-testid="stSidebar"] {display: none !important;}
+div[data-testid="collapsedControl"] {display: none !important;}
 
 /* Background */
 body {
     background-color: #F2F2F2;
+}
+
+/* Remove top padding */
+div.block-container {
+    padding-top: 0rem;
 }
 
 /* Top Header Bar */
@@ -64,17 +72,16 @@ body {
     cursor: pointer;
 }
 
-/* Centering Buttons */
+/* Button container */
 .btn-container {
-    margin-top: 80px;
+    margin-top: 120px;
     display: flex;
     justify-content: center;
-    gap: 50px;
+    gap: 80px;
 }
 
 </style>
 """, unsafe_allow_html=True)
-
 
 # ================= HEADER ================= #
 st.markdown(f"""
@@ -85,32 +92,27 @@ st.markdown(f"""
 """, unsafe_allow_html=True)
 
 
-# ================= MAIN BUTTON GRID ================= #
-st.markdown('<div class="btn-container">', unsafe_allow_html=True)
-
-# Buttons for page navigation using session_state
+# ================= MAIN BUTTONS ================= #
 col1, col2, col3, col4 = st.columns([1,1,1,1])
 
 with col1:
-    if st.button("Magazine", key="mag"):
+    if st.button("Magazine", key="mag", help="Go to magazine calculator", use_container_width=True):
         st.session_state["page"] = "magazine"
 
 with col2:
-    if st.button("Equipment", key="eq"):
+    if st.button("Equipment", key="eq", use_container_width=True):
         st.session_state["page"] = "equipment"
 
 with col3:
-    if st.button("Plant", key="pl"):
+    if st.button("Plant", key="pl", use_container_width=True):
         st.session_state["page"] = "plant"
 
 with col4:
-    if st.button("Personnel", key="per"):
+    if st.button("Personnel", key="per", use_container_width=True):
         st.session_state["page"] = "personnel"
 
-st.markdown('</div>', unsafe_allow_html=True)
 
-
-# ================= NAVIGATION ENGINE ================= #
+# ================= PAGE NAVIGATION ================= #
 if "page" in st.session_state:
     if st.session_state["page"] == "magazine":
         st.switch_page("pages/1_Magazine.py")
