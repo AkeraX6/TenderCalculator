@@ -1,1 +1,12 @@
+ProductName,Type,BoxesPerPallet,PiecesPerBox,PalletsPerContainer
+RIOBOOSTER 400,Booster,30,56,20
+RIOBOOSTER 250,Booster,40,50,20
+RIOBOOSTER 150,Booster,50,56,20
+RIOTRONIC,Detonator,30,60,20
+RIONEL,Detonator,60,40,20
+Riogel 32mm,Emulsion,36,0,20
+Riogel 25mm,Emulsion,42,0,20
+Nonel 3m,Detonator,100,50,20
+Cast Booster 500g,Booster,25,0,20
+Detonating Cord 10g,Accessory,80,0,20
 
