@@ -246,7 +246,7 @@ st.markdown("---")
 if len(st.session_state.mag_items) > 0:
     left, mid, right = st.columns([3, 2, 3])
     with mid:
-        calc_clicked = st.button("🛳 Calculate containers", key="btn_calc")
+        calc_clicked = st.button("Calculate containers", key="btn_calc")
     if calc_clicked:
         rows, total_fraction, total_containers = calculate_containers(
             st.session_state.mag_items, df_products
@@ -268,7 +268,7 @@ if st.session_state.mag_result is not None:
         f"""
         <div class="summary-box">
           <h4>Total container fraction: {res['fraction']:.3f}</h4>
-          <h3>🛳 Required full containers: <strong>{res['containers']}</strong></h3>
+          <h3>Required full containers: <strong>{res['containers']}</strong></h3>
         </div>
         """,
         unsafe_allow_html=True
