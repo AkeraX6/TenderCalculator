@@ -3,8 +3,23 @@ import streamlit as st
 # ---------------------- PAGE CONFIG ----------------------
 st.set_page_config(page_title="Tender Calculator", layout="wide")
 
-# ---------------------- GLOBAL CSS ----------------------
-st.markdown("""
+# ---------------------- THEME TOGGLE ----------------------
+if "theme" not in st.session_state:
+    st.session_state.theme = "light"
+
+# Place toggle on top right
+top_right = st.columns([10, 1])[1]
+with top_right:
+    theme_choice = st.toggle("🌙", help="Toggle dark mode", value=(st.session_state.theme == "dark"))
+
+if theme_choice:
+    st.session_state.theme = "dark"
+else:
+    st.session_state.theme = "light"
+
+
+# ---------------------- GLOBAL CSS BASE ----------------------
+base_css = """
 <style>
 
 header {visibility: hidden;}
@@ -12,7 +27,7 @@ footer {visibility: hidden;}
 [data-testid="stSidebar"] {display: none;}
 
 div.block-container {
-    padding-top: 0 !important; /* Remove white top space */
+    padding-top: 0 !important;
     margin-top: -35px !important;
     max-width: 1200px;
 }
@@ -48,7 +63,37 @@ div.block-container {
 }
 
 </style>
-""", unsafe_allow_html=True)
+"""
+st.markdown(base_css, unsafe_allow_html=True)
+
+
+# ---------------------- DARK MODE OVERRIDE ----------------------
+if st.session_state.theme == "dark":
+    st.markdown("""
+    <style>
+    body, .stApp, .block-container {
+        background-color: #121212 !important;
+        color: #E0E0E0 !important;
+    }
+
+    .desc {
+        color: #C8C8C8 !important;
+    }
+
+    /* Dark mode buttons */
+    .stButton > button {
+        background-color: #1E1E1E !important;
+        color: #E1251B !important;
+        border: 3px solid #E1251B !important;
+    }
+
+    .stButton > button:hover {
+        background-color: #E1251B !important;
+        color: white !important;
+    }
+    </style>
+    """, unsafe_allow_html=True)
+
 
 # ---------------------- BANNER ----------------------
 st.image("tender_banner.png", use_column_width=True)
@@ -57,7 +102,6 @@ st.image("tender_banner.png", use_column_width=True)
 st.markdown('<p class="desc">A tool to estimate requirements for mining projects.</p>', unsafe_allow_html=True)
 
 # ---------------------- BUTTON GRID CENTERED ----------------------
-# Each row is 3 columns of equal size → Perfect symmetry
 col1, col2, col3 = st.columns(3)
 
 with col1:
@@ -70,7 +114,6 @@ with col3:
     if st.button("🏭 Plant"):
         st.switch_page("pages/3_Plant.py")
 
-# Spacing between rows
 st.markdown("<br>", unsafe_allow_html=True)
 
 col4, col5, col6 = st.columns(3)
@@ -82,4 +125,4 @@ with col5:
     if st.button("👷 Personnel"):
         st.switch_page("pages/4_Personnel.py")
 with col6:
-    st.write("")  # Empty placeholder for symmetry
+    st.write("")  # Symmetry placeholder
