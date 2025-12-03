@@ -12,6 +12,13 @@ with col_home:
     if st.button("🏠 Home"):
         st.switch_page("Home.py")
 
+# ---------------------- OPTIONAL EXCEL SUPPORT ----------------------
+try:
+    import openpyxl  # noqa: F401
+    HAS_OPENPYXL = True
+except ImportError:
+    HAS_OPENPYXL = False
+
 # ---------------------- CSS ----------------------
 st.markdown("""
 <style>
@@ -64,12 +71,19 @@ div.block-container {
 # ---------------------- LOAD PRODUCT LIST ----------------------
 @st.cache_data
 def load_products():
-    return pd.read_csv("data/Products_TEST.csv")
+    df = pd.read_csv("data/Products_TEST.csv")
+
+    # Force numeric types
+    for col in ["BoxesPerPallet", "PiecesPerBox", "PalletsPerContainer"]:
+        if col in df.columns:
+            df[col] = pd.to_numeric(df[col], errors="coerce").fillna(0)
+
+    return df
 
 try:
     df_products = load_products()
 except Exception as e:
-    st.error("❌ Could not load data/Products_TEST.csv. Please check the path and file.")
+    st.error("❌ Could not load data/Products_TEST.csv. Check path and format.")
     st.stop()
 
 required_cols = {"ProductName", "BoxesPerPallet", "PiecesPerBox", "PalletsPerContainer"}
@@ -127,7 +141,6 @@ st.markdown("### 🧾 Products list")
 if len(st.session_state.mag_items) == 0:
     st.info("No products added yet. Use the 'Add' line above to insert items.")
 else:
-    # show each row
     for i, item in enumerate(st.session_state.mag_items):
         st.markdown("<div class='product-row'>", unsafe_allow_html=True)
 
@@ -189,21 +202,26 @@ def calculate_containers(items, df_ref):
         if prod_row.empty:
             continue
 
-        boxes_per_pallet = prod_row["BoxesPerPallet"].iloc[0]
-        pieces_per_box = prod_row["PiecesPerBox"].iloc[0]
-        pallets_per_container = prod_row["PalletsPerContainer"].iloc[0]
+        boxes_per_pallet = float(prod_row["BoxesPerPallet"].iloc[0])
+        pieces_per_box = float(prod_row["PiecesPerBox"].iloc[0])
+        pallets_per_container = float(prod_row["PalletsPerContainer"].iloc[0])
 
-        # Defaults
-        if not isinstance(pallets_per_container, (int, float)) or pallets_per_container <= 0:
-            pallets_per_container = 20
+        if pallets_per_container <= 0:
+            pallets_per_container = 20  # default if missing
 
-        # Convert to boxes
-        if unit == "Pcs" and isinstance(pieces_per_box, (int, float)) and pieces_per_box > 0:
+        # 1) Qty -> Boxes
+        if unit == "Pcs" and pieces_per_box > 0:
             boxes = math.ceil(qty / pieces_per_box)
         else:
-            boxes = qty
+            boxes = qty  # already in boxes
 
-        pallets = math.ceil(boxes / boxes_per_pallet) if boxes_per_pallet > 0 else 0
+        # 2) Boxes -> Pallets
+        if boxes_per_pallet > 0:
+            pallets = math.ceil(boxes / boxes_per_pallet)
+        else:
+            pallets = 0
+
+        # 3) Pallets -> Container fraction
         fraction = pallets / pallets_per_container if pallets_per_container > 0 else 0.0
         total_fraction += fraction
 
@@ -252,13 +270,25 @@ if st.session_state.mag_result is not None:
         unsafe_allow_html=True
     )
 
-    # Export Excel
-    output = BytesIO()
-    st.session_state.mag_table.to_excel(output, index=False)
-    output.seek(0)
-    st.download_button(
-        "📤 Export to Excel",
-        data=output,
-        file_name="Magazine_Container_Calc.xlsx",
-        mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-    )
+    # ---- Download section ----
+    if HAS_OPENPYXL:
+        # Excel export
+        output = BytesIO()
+        st.session_state.mag_table.to_excel(output, index=False, engine="openpyxl")
+        output.seek(0)
+        st.download_button(
+            "📤 Download Excel",
+            data=output,
+            file_name="Magazine_Container_Calc.xlsx",
+            mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+        )
+    else:
+        # Fallback to CSV if openpyxl not installed
+        csv_data = st.session_state.mag_table.to_csv(index=False).encode("utf-8")
+        st.download_button(
+            "📤 Download CSV",
+            data=csv_data,
+            file_name="Magazine_Container_Calc.csv",
+            mime="text/csv"
+        )
+        st.info("Excel export requires the 'openpyxl' package. CSV is provided instead.")
