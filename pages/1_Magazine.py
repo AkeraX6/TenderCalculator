@@ -102,7 +102,10 @@ if "mag_table" not in st.session_state:
     st.session_state.mag_table = None
 
 # ---------------------- TITLE ----------------------
-st.markdown("## 📦 Magazine Container Calculator")
+st.markdown(
+    "<h2 style='text-align:center;'>📦 Magazine Container Calculator</h2>",
+    unsafe_allow_html=True
+)
 st.markdown(
     "<p style='text-align:center;font-style:italic;'>"
     "Add products requested by the client, then click <strong>Calculate containers</strong>."
