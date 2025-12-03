@@ -12,13 +12,6 @@ with col_home:
     if st.button("🏠 Home"):
         st.switch_page("Home.py")
 
-# ---------------------- OPTIONAL EXCEL SUPPORT ----------------------
-try:
-    import openpyxl  # noqa: F401
-    HAS_OPENPYXL = True
-except ImportError:
-    HAS_OPENPYXL = False
-
 # ---------------------- CSS ----------------------
 st.markdown("""
 <style>
@@ -73,7 +66,7 @@ div.block-container {
 def load_products():
     df = pd.read_csv("data/Products_TEST.csv")
 
-    # Force numeric types
+    # Ensure numeric types
     for col in ["BoxesPerPallet", "PiecesPerBox", "PalletsPerContainer"]:
         if col in df.columns:
             df[col] = pd.to_numeric(df[col], errors="coerce").fillna(0)
@@ -82,8 +75,8 @@ def load_products():
 
 try:
     df_products = load_products()
-except Exception as e:
-    st.error("❌ Could not load data/Products_TEST.csv. Check path and format.")
+except Exception:
+    st.error("❌ Could not load data/Products_TEST.csv. Check the path and file.")
     st.stop()
 
 required_cols = {"ProductName", "BoxesPerPallet", "PiecesPerBox", "PalletsPerContainer"}
@@ -93,8 +86,8 @@ if missing:
     st.stop()
 
 # ---------------------- SESSION STATE ----------------------
+# Each item: {product, qty, unit}
 if "mag_items" not in st.session_state:
-    # each item: {"product": str, "qty": int, "unit": "Boxes"/"Pcs"}
     st.session_state.mag_items = []
 if "mag_result" not in st.session_state:
     st.session_state.mag_result = None
@@ -108,7 +101,8 @@ st.markdown(
 )
 st.markdown(
     "<p style='text-align:center;font-style:italic;'>"
-    "Add products requested by the client, then click <strong>Calculate containers</strong>."
+    "Add products requested by the client, then click "
+    "<strong>Calculate containers</strong>."
     "</p>",
     unsafe_allow_html=True
 )
@@ -117,7 +111,7 @@ st.write("")
 # ---------------------- ADD PRODUCT BAR ----------------------
 st.markdown("### ➕ Add product")
 
-add_c1, add_c2, add_c3, add_c4 = st.columns([3, 1.2, 1.2, 1])
+add_c1, add_c2, add_c3, add_c4 = st.columns([3, 1.4, 1.2, 1.0])
 
 with add_c1:
     add_product = st.selectbox("Product", df_products["ProductName"], key="add_product")
@@ -129,7 +123,9 @@ with add_c3:
     add_unit = st.selectbox("UDM", ["Boxes", "Pcs"], key="add_unit")
 
 with add_c4:
-    if st.button("Add", key="btn_add"):
+    st.write("")  # push button down to align
+    st.write("")
+    if st.button("➕ Add", key="btn_add"):
         st.session_state.mag_items.append(
             {"product": add_product, "qty": int(add_qty), "unit": add_unit}
         )
@@ -147,10 +143,10 @@ else:
     for i, item in enumerate(st.session_state.mag_items):
         st.markdown("<div class='product-row'>", unsafe_allow_html=True)
 
-        c1, c2, c3, c4, c5 = st.columns([3, 1, 1, 1, 1])
+        c1, c2, c3, c4, c5 = st.columns([3, 1.2, 1.2, 1, 1])
 
         with c1:
-            st.markdown(f"**Product:** {item['product']}")
+            st.text(item["product"])
 
         with c2:
             new_qty = st.number_input(
@@ -165,6 +161,7 @@ else:
             )
 
         with c4:
+            st.write("")
             if st.button("✏ Update", key=f"update_{i}"):
                 item["qty"] = int(new_qty)
                 item["unit"] = new_unit
@@ -174,6 +171,7 @@ else:
                 st.rerun()
 
         with c5:
+            st.write("")
             if st.button("🗑 Delete", key=f"delete_{i}"):
                 st.session_state.mag_items.pop(i)
                 st.session_state.mag_result = None
@@ -198,7 +196,7 @@ def calculate_containers(items, df_ref):
 
     for item in items:
         prod_name = item["product"]
-        qty = item["qty"]
+        qty = int(item["qty"])
         unit = item["unit"]
 
         prod_row = df_ref[df_ref["ProductName"] == prod_name]
@@ -210,21 +208,21 @@ def calculate_containers(items, df_ref):
         pallets_per_container = float(prod_row["PalletsPerContainer"].iloc[0])
 
         if pallets_per_container <= 0:
-            pallets_per_container = 20  # default if missing
+            pallets_per_container = 40  # default if missing
 
-        # 1) Qty -> Boxes
+        # 1) Quantity → Boxes
         if unit == "Pcs" and pieces_per_box > 0:
             boxes = math.ceil(qty / pieces_per_box)
         else:
             boxes = qty  # already in boxes
 
-        # 2) Boxes -> Pallets
+        # 2) Boxes → Pallets
         if boxes_per_pallet > 0:
             pallets = math.ceil(boxes / boxes_per_pallet)
         else:
             pallets = 0
 
-        # 3) Pallets -> Container fraction
+        # 3) Pallets → Container fraction
         fraction = pallets / pallets_per_container if pallets_per_container > 0 else 0.0
         total_fraction += fraction
 
@@ -244,9 +242,12 @@ def calculate_containers(items, df_ref):
 st.write("")
 st.markdown("---")
 
-# ---------------------- CALCULATE BUTTON ----------------------
+# ---------------------- CALCULATE BUTTON (CENTERED) ----------------------
 if len(st.session_state.mag_items) > 0:
-    if st.button("Calculate containers"):
+    left, mid, right = st.columns([3, 2, 3])
+    with mid:
+        calc_clicked = st.button("🛳 Calculate containers", key="btn_calc")
+    if calc_clicked:
         rows, total_fraction, total_containers = calculate_containers(
             st.session_state.mag_items, df_products
         )
@@ -266,32 +267,19 @@ if st.session_state.mag_result is not None:
     st.markdown(
         f"""
         <div class="summary-box">
-          <h4>Total container fraction: {res['fraction']:.1f}</h4>
-          <h3>Required full containers: <strong>{res['containers']}</strong></h3>
+          <h4>Total container fraction: {res['fraction']:.3f}</h4>
+          <h3>🛳 Required full containers: <strong>{res['containers']}</strong></h3>
         </div>
         """,
         unsafe_allow_html=True
     )
 
-    # ---- Download section ----
-    if HAS_OPENPYXL:
-        # Excel export
-        output = BytesIO()
-        st.session_state.mag_table.to_excel(output, index=False, engine="openpyxl")
-        output.seek(0)
-        st.download_button(
-            "📤 Download Excel",
-            data=output,
-            file_name="Magazine_Container_Calc.xlsx",
-            mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-        )
-    else:
-        # Fallback to CSV if openpyxl not installed
-        csv_data = st.session_state.mag_table.to_csv(index=False).encode("utf-8")
-        st.download_button(
-            "📤 Download CSV",
-            data=csv_data,
-            file_name="Magazine_Container_Calc.csv",
-            mime="text/csv"
-        )
-        st.info("Excel export requires the 'openpyxl' package. CSV is provided instead.")
+    # CSV export (no openpyxl dependency)
+    csv_data = st.session_state.mag_table.to_csv(index=False).encode("utf-8")
+    st.download_button(
+        "📤 Download CSV",
+        data=csv_data,
+        file_name="Magazine_Container_Calc.csv",
+        mime="text/csv"
+    )
+
