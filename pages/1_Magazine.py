@@ -267,7 +267,7 @@ if st.session_state.mag_result is not None:
     st.markdown(
         f"""
         <div class="summary-box">
-          <h4>Total container fraction: {res['fraction']:.3f}</h4>
+          <h4>Total container fraction: {res['fraction']:.1f}</h5>
           <h3>Required full containers: <strong>{res['containers']}</strong></h3>
         </div>
         """,
