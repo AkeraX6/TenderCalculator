@@ -1,12 +1,13 @@
-ProductName,PiecesPerBox,BoxesPerPallet,PalletsPerContainer
-RIOBOOSTER400,56,48,40
-RIOBOOSTER250,56,48,40
-RIOBOOSTER150,56,48,40
-RIOTRONIC,30,64,30
-RIONEL,60,40,16
-Riogel32mm,25,72,20
-Riogel25mm,25,72,20
-Nonel3m,56,48,40
-CastBooster,90,36,10
-
+ProductName,PiecesPerBox,BoxesPerPallet,PalletsPerContainer,HazardCode
+RIOBOOSTER400,56,30,40,1.1D
+RIOBOOSTER250,50,40,40,1.1D
+RIOBOOSTER150,56,50,40,1.1D
+RIONEL,40,60,40,1.4B
+RIOTRONIC,60,30,40,1.4B
+Nonel3m,50,48,40,1.1B
+Detonating Cord 10g/m,80,40,40,1.1D
+Emulsion Cartridge 32x400mm,0,36,40,1.1D
+Emulsion Cartridge 25x200mm,0,42,40,1.1D
+Cast Booster 500g,0,25,40,1.1D
+Connector Tubes,30,10,90,1.4S
 
