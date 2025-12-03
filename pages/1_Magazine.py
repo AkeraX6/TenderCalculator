@@ -12,7 +12,7 @@ with col_home:
     if st.button("🏠 Home"):
         st.switch_page("Home.py")
 
-# ---------------------- CSS DESIGN ----------------------
+# ---------------------- CSS ----------------------
 st.markdown("""
 <style>
 header {visibility: hidden;}
@@ -24,12 +24,7 @@ div.block-container {
     max-width: 1200px;
 }
 
-/* Main title */
-h2 {
-    text-align: center;
-}
-
-/* Buttons (global style) */
+/* Global button style */
 .stButton > button {
     border-radius: 40px !important;
     border: 3px solid #E1251B !important;
@@ -48,7 +43,7 @@ h2 {
 }
 
 .product-row {
-    padding: 6px 10px;
+    padding: 8px 10px;
     border-radius: 10px;
     background-color: #F7F7F7;
     margin-bottom: 6px;
@@ -66,224 +61,204 @@ h2 {
 </style>
 """, unsafe_allow_html=True)
 
-# ---------------------- LOAD PRODUCTS CSV ----------------------
+# ---------------------- LOAD PRODUCT LIST ----------------------
 @st.cache_data
 def load_products():
     return pd.read_csv("data/Products_TEST.csv")
 
-df_products = load_products()
+try:
+    df_products = load_products()
+except Exception as e:
+    st.error("❌ Could not load data/Products_TEST.csv. Please check the path and file.")
+    st.stop()
 
-# Ensure correct columns exist
 required_cols = {"ProductName", "BoxesPerPallet", "PiecesPerBox", "PalletsPerContainer"}
 missing = required_cols - set(df_products.columns)
 if missing:
-    st.error(f"Missing columns in Products_TEST.csv: {missing}")
+    st.error(f"❌ Missing columns in Products_TEST.csv: {missing}")
     st.stop()
 
-# ---------------------- SESSION INIT ----------------------
-if "mag_order" not in st.session_state:
-    st.session_state.mag_order = []  # list of dicts
-if "mag_calc_result" not in st.session_state:
-    st.session_state.mag_calc_result = None
-if "mag_calc_table" not in st.session_state:
-    st.session_state.mag_calc_table = None
+# ---------------------- SESSION STATE ----------------------
+if "mag_items" not in st.session_state:
+    # each item: {"product": str, "qty": int, "unit": "Boxes"/"Pcs"}
+    st.session_state.mag_items = []
+if "mag_result" not in st.session_state:
+    st.session_state.mag_result = None
+if "mag_table" not in st.session_state:
+    st.session_state.mag_table = None
 
-# ---------------------- PAGE TITLE ----------------------
+# ---------------------- TITLE ----------------------
 st.markdown("## 📦 Magazine Container Calculator")
 st.markdown(
     "<p style='text-align:center;font-style:italic;'>"
-    "Add requested products, then click <strong>Calculate</strong> to estimate container needs."
+    "Add products requested by the client, then click <strong>Calculate containers</strong>."
     "</p>",
     unsafe_allow_html=True
 )
-
 st.write("")
 
-# ---------------------- ADD PRODUCT AREA ----------------------
-st.markdown("### ➕ Add Product")
+# ---------------------- ADD PRODUCT BAR ----------------------
+st.markdown("### ➕ Add product")
 
-add_col1, add_col2, add_col3, add_col4 = st.columns([3, 1.5, 1.5, 1])
+add_c1, add_c2, add_c3, add_c4 = st.columns([3, 1.2, 1.2, 1])
 
-with add_col1:
-    new_product = st.selectbox("Product", df_products["ProductName"], key="new_product")
+with add_c1:
+    add_product = st.selectbox("Product", df_products["ProductName"], key="add_product")
 
-with add_col2:
-    new_qty = st.number_input("Quantity", min_value=1, value=1, key="new_qty")
+with add_c2:
+    add_qty = st.number_input("Quantity", min_value=1, value=1, key="add_qty")
 
-with add_col3:
-    new_unit = st.selectbox("UDM", ["Boxes", "Pcs"], key="new_unit")
+with add_c3:
+    add_unit = st.selectbox("UDM", ["Boxes", "Pcs"], key="add_unit")
 
-with add_col4:
-    if st.button("Add", key="add_row"):
-        st.session_state.mag_order.append(
-            {
-                "Product": new_product,
-                "Qty": new_qty,
-                "Unit": new_unit
-            }
+with add_c4:
+    if st.button("Add", key="btn_add"):
+        st.session_state.mag_items.append(
+            {"product": add_product, "qty": int(add_qty), "unit": add_unit}
         )
-        st.session_state.mag_calc_result = None
-        st.session_state.mag_calc_table = None
-        st.success(f"{new_product} added.")
+        st.session_state.mag_result = None
+        st.session_state.mag_table = None
+        st.success(f"{add_product} added.")
 
+st.write("")
+st.markdown("### 🧾 Products list")
 
-# ---------------------- EXISTING PRODUCTS LIST ----------------------
-st.markdown("### 🧾 Product List")
-
-if len(st.session_state.mag_order) == 0:
-    st.info("No products added yet. Use the 'Add' button above to add items.")
+# ---------------------- PRODUCT ROWS (EDIT / DELETE) ----------------------
+if len(st.session_state.mag_items) == 0:
+    st.info("No products added yet. Use the 'Add' line above to insert items.")
 else:
-    # Display each row as editable line
-    for i, row in enumerate(st.session_state.mag_order):
-        with st.container():
-            st.markdown("<div class='product-row'>", unsafe_allow_html=True)
-            c1, c2, c3, c4, c5 = st.columns([3, 1, 1, 1, 1])
+    # show each row
+    for i, item in enumerate(st.session_state.mag_items):
+        st.markdown("<div class='product-row'>", unsafe_allow_html=True)
 
-            with c1:
-                prod_key = f"prod_{i}"
-                current_prod = st.selectbox(
-                    "Product",
-                    df_products["ProductName"],
-                    index=df_products[df_products["ProductName"] == row["Product"]].index[0]
-                    if row["Product"] in df_products["ProductName"].values else 0,
-                    key=prod_key
-                )
+        c1, c2, c3, c4, c5 = st.columns([3, 1, 1, 1, 1])
 
-            with c2:
-                qty_key = f"qty_{i}"
-                current_qty = st.number_input(
-                    "Qty",
-                    min_value=1,
-                    value=int(row["Qty"]),
-                    key=qty_key
-                )
+        with c1:
+            st.markdown(f"**Product:** {item['product']}")
 
-            with c3:
-                udm_key = f"unit_{i}"
-                current_unit = st.selectbox(
-                    "UDM",
-                    ["Boxes", "Pcs"],
-                    index=0 if row["Unit"] == "Boxes" else 1,
-                    key=udm_key
-                )
+        with c2:
+            new_qty = st.number_input(
+                "Qty", min_value=1, value=int(item["qty"]), key=f"qty_{i}"
+            )
 
-            with c4:
-                if st.button("✏ Update", key=f"update_{i}"):
-                    row["Product"] = current_prod
-                    row["Qty"] = current_qty
-                    row["Unit"] = current_unit
-                    st.session_state.mag_calc_result = None
-                    st.session_state.mag_calc_table = None
-                    st.success(f"Row {i+1} updated.")
+        with c3:
+            new_unit = st.selectbox(
+                "UDM", ["Boxes", "Pcs"],
+                index=0 if item["unit"] == "Boxes" else 1,
+                key=f"unit_{i}"
+            )
 
-            with c5:
-                if st.button("🗑 Delete", key=f"del_{i}"):
-                    st.session_state.mag_order.pop(i)
-                    st.session_state.mag_calc_result = None
-                    st.session_state.mag_calc_table = None
-                    st.warning(f"Row {i+1} deleted.")
-                    st.markdown("</div>", unsafe_allow_html=True)
-                    st.stop()  # Stop to avoid index mismatch
+        with c4:
+            if st.button("✏ Update", key=f"update_{i}"):
+                item["qty"] = int(new_qty)
+                item["unit"] = new_unit
+                st.session_state.mag_result = None
+                st.session_state.mag_table = None
+                st.success(f"Row {i+1} updated.")
+                st.rerun()
 
-            st.markdown("</div>", unsafe_allow_html=True)
+        with c5:
+            if st.button("🗑 Delete", key=f"delete_{i}"):
+                st.session_state.mag_items.pop(i)
+                st.session_state.mag_result = None
+                st.session_state.mag_table = None
+                st.warning(f"Row {i+1} deleted.")
+                st.rerun()
+
+        st.markdown("</div>", unsafe_allow_html=True)
 
     st.write("")
-    if st.button("🗑 Clear All Products"):
-        st.session_state.mag_order = []
-        st.session_state.mag_calc_result = None
-        st.session_state.mag_calc_table = None
+    if st.button("🗑 Clear all products"):
+        st.session_state.mag_items = []
+        st.session_state.mag_result = None
+        st.session_state.mag_table = None
         st.warning("All products cleared.")
-
+        st.rerun()
 
 # ---------------------- CALCULATION LOGIC ----------------------
-def calculate_containers(order_rows, df_ref):
-    results = []
+def calculate_containers(items, df_ref):
+    rows = []
     total_fraction = 0.0
 
-    for row in order_rows:
-        prod_name = row["Product"]
-        qty = row["Qty"]
-        unit = row["Unit"]
+    for item in items:
+        prod_name = item["product"]
+        qty = item["qty"]
+        unit = item["unit"]
 
-        prod_data = df_ref[df_ref["ProductName"] == prod_name]
-        if prod_data.empty:
+        prod_row = df_ref[df_ref["ProductName"] == prod_name]
+        if prod_row.empty:
             continue
 
-        boxes_per_pallet = prod_data["BoxesPerPallet"].iloc[0]
-        pieces_per_box = prod_data["PiecesPerBox"].iloc[0]
-        pallets_per_container = prod_data["PalletsPerContainer"].iloc[0]
+        boxes_per_pallet = prod_row["BoxesPerPallet"].iloc[0]
+        pieces_per_box = prod_row["PiecesPerBox"].iloc[0]
+        pallets_per_container = prod_row["PalletsPerContainer"].iloc[0]
 
-        # Safety defaults
+        # Defaults
         if not isinstance(pallets_per_container, (int, float)) or pallets_per_container <= 0:
             pallets_per_container = 20
 
-        # Convert qty to boxes
-        if unit == "Pcs" and pieces_per_box and pieces_per_box > 0:
+        # Convert to boxes
+        if unit == "Pcs" and isinstance(pieces_per_box, (int, float)) and pieces_per_box > 0:
             boxes = math.ceil(qty / pieces_per_box)
         else:
-            boxes = qty  # already in boxes
+            boxes = qty
 
         pallets = math.ceil(boxes / boxes_per_pallet) if boxes_per_pallet > 0 else 0
-        fraction = pallets / pallets_per_container if pallets_per_container > 0 else 0
-
+        fraction = pallets / pallets_per_container if pallets_per_container > 0 else 0.0
         total_fraction += fraction
 
-        results.append({
+        rows.append({
             "Product": prod_name,
             "Qty entered": qty,
-            "Unit": unit,
-            "Boxes (calculated)": boxes,
+            "Unit entered": unit,
+            "Boxes (calc)": boxes,
             "Pallets": pallets,
             "Container fraction": round(fraction, 3)
         })
 
     total_containers = math.ceil(total_fraction)
 
-    return results, total_fraction, total_containers
-
+    return rows, total_fraction, total_containers
 
 st.write("")
 st.markdown("---")
 
 # ---------------------- CALCULATE BUTTON ----------------------
-if len(st.session_state.mag_order) > 0:
-    if st.button("🛳 Calculate Containers"):
-        table, total_fraction, total_containers = calculate_containers(
-            st.session_state.mag_order, df_products
+if len(st.session_state.mag_items) > 0:
+    if st.button("🛳 Calculate containers"):
+        rows, total_fraction, total_containers = calculate_containers(
+            st.session_state.mag_items, df_products
         )
-        st.session_state.mag_calc_table = pd.DataFrame(table)
-        st.session_state.mag_calc_result = {
-            "total_fraction": total_fraction,
-            "total_containers": total_containers
+        st.session_state.mag_table = pd.DataFrame(rows)
+        st.session_state.mag_result = {
+            "fraction": total_fraction,
+            "containers": total_containers
         }
 
 # ---------------------- SHOW RESULTS ----------------------
-if st.session_state.mag_calc_result is not None:
-    res = st.session_state.mag_calc_result
-    st.markdown("### 📊 Calculation Result")
+if st.session_state.mag_result is not None:
+    res = st.session_state.mag_result
+    st.markdown("### 📊 Calculation result")
 
-    st.dataframe(st.session_state.mag_calc_table, use_container_width=True)
+    st.dataframe(st.session_state.mag_table, use_container_width=True)
 
     st.markdown(
         f"""
         <div class="summary-box">
-        <h4>Total container fraction: {res['total_fraction']:.3f}</h4>
-        <h3>🛳 Required full containers: <strong>{res['total_containers']}</strong></h3>
+          <h4>Total container fraction: {res['fraction']:.3f}</h4>
+          <h3>🛳 Required full containers: <strong>{res['containers']}</strong></h3>
         </div>
         """,
         unsafe_allow_html=True
     )
 
-    # Export to Excel
+    # Export Excel
     output = BytesIO()
-    st.session_state.mag_calc_table.to_excel(output, index=False)
+    st.session_state.mag_table.to_excel(output, index=False)
     output.seek(0)
     st.download_button(
-        label="📤 Export Calculation to Excel",
+        "📤 Export to Excel",
         data=output,
         file_name="Magazine_Container_Calc.xlsx",
         mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
     )
-
-
-
